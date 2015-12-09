@@ -1,0 +1,8 @@
+include/
+share/
+bin/
+lib/
+.Python
+
+__pycache__/
+*.py[oca]
