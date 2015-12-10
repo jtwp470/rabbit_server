@@ -6,3 +6,7 @@ lib/
 
 __pycache__/
 *.py[oca]
+
+pip-selfcheck.json
+
+*.db
