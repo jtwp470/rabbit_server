@@ -7,6 +7,7 @@ from rabbit_server.forms import LoginForm
 
 is_admin = False
 
+
 def login_required(f):
     @wraps(f)
     def decorated_view(*args, **kwargs):
@@ -105,3 +106,9 @@ def view_rule():
 @app.route('/notice')
 def view_notice():
     return render_template('notice.html')
+
+
+@app.route('/user/<id>')
+def view_user(id):
+    user = db.session.query(UserInfo).filter(UserInfo.id == id).all()
+    return render_template('user_info.html', user=user[0])

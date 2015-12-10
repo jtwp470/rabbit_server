@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1>{{ user.name }}</h1>
+
+<table>
+    <tr><th>title</th><th>information</th></tr>
+    <tr><td>mail</td><td>{{ user.mail }}</td></tr>
+    <tr><td>score</td><td>{{ user.score }} pts</td></tr>
+</table>
+
+<h2>Solved Problem</h2>
+
+<table>
+    <tr><th>title</th><th>score</th></tr>
+</table>
+{% endblock %}

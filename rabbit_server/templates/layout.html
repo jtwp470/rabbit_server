@@ -44,7 +44,8 @@
                     </ul>
                     <!-- navber-right -->
                     <ul class="nav navbar-nav navbar-right">
-                        {% if session.id %}
+                      {% if session.id %}
+                        <li><a href="/user/{{ session.id }}">{{ session.name }}</a></li>
                         <li><a href="{{ url_for('logout') }}">logout</a></li>
                         {% else %}
                         <li><a href="{{ url_for('login') }}">login</a></li>
