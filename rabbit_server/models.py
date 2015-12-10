@@ -11,7 +11,7 @@ class UserInfo(db.Model):
         name text,
         mail text,
         hashed_password text,
-        point integer
+        score integer
     )
     """
     __tablename__ = "user_info"
@@ -19,6 +19,7 @@ class UserInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), default='', nullable=False)
     mail = db.Column(db.String(100), default='', nullable=False)
+    score = db.Column(db.Integer, default=0)
     _password = db.Column('password', db.String(100), nullable=False)
 
     def _get_password(self):
@@ -47,8 +48,8 @@ class UserInfo(db.Model):
     def __repr__(self):
         return """
         <User id={id} name={name}
-        mail={mail} point={point}
-        """.format(self.id, self.name, self.mail. self.point)
+        mail={mail} score={score}
+        """.format(id=str(self.id), name=self.name, mail=self.mail, score=str(self.score))
 
 
 def init():

@@ -37,10 +37,10 @@
 
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
-                        <li><a href="">Problem</a></li>
-                        <li><a href="">Ranking</a></li>
-                        <li><a href="">Rule</a></li>
-                        <li><a href="">Notice</a></li>
+                        <li><a href="{{ url_for('view_problem') }}">Problem</a></li>
+                        <li><a href="{{ url_for('view_ranking') }}">Ranking</a></li>
+                        <li><a href="{{ url_for('view_rule') }}">Rule</a></li>
+                        <li><a href="{{ url_for('view_notice') }}">Notice</a></li>
                     </ul>
                     <!-- navber-right -->
                     <ul class="nav navbar-nav navbar-right">
@@ -57,10 +57,12 @@
         </nav>
 
         <div class="container">
-            {% for message in get_flashed_messages() %}
-            <p class="flash">{{ message | safe }}</p>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}" role="alert">{{ message}}</div>
             {% endfor %}
-            {% block body %}{% endblock %}
+          {% endwith %}
+          {% block body %}{% endblock %}
         </div>
     </body>
 </html>
