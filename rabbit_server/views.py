@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, redirect, url_for, render_template, session, g, \
-    flash
+    flash, abort
 from rabbit_server import app, db
 from rabbit_server.models import UserInfo
 from rabbit_server.forms import LoginForm
@@ -26,7 +26,12 @@ def load_user():
         if user_id == 1:
             is_admin = True
             print("This is admin")
-        g.user = UserInfo.query.get(session['id'])
+            g.user = UserInfo.query.get(session['id'])
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 @app.route('/')
@@ -62,8 +67,6 @@ def logout():
 @app.route('/admin/add', methods=["GET", "POST"])
 def add_admin():
     admin = db.session.query(UserInfo).filter(UserInfo.id == 1).all()
-    print(type(admin))
-    print(admin)
     if admin == []:
         if request.method == 'POST':
             # Adminを作成する
@@ -111,4 +114,29 @@ def view_notice():
 @app.route('/user/<id>')
 def view_user(id):
     user = db.session.query(UserInfo).filter(UserInfo.id == id).all()
-    return render_template('user_info.html', user=user[0])
+    if user:
+        return render_template('user_info.html', user=user[0])
+    else:
+        abort(404)
+
+
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    if request.method == 'POST':
+        if request.form['password'] == request.form['re_password']:
+            user = UserInfo(name=request.form['name'],
+                            mail=request.form['mail'],
+                            password=request.form['password'],
+                            score=0)
+            db.session.add(user)
+            db.session.commit()
+            # ログインしたことにする
+            session['id'] = user.id
+            session['name'] = user.name
+            return redirect(url_for('start_page'))
+        else:
+            flash('Password is not match! Please retype password',
+                  'danger')
+            return redirect(url_for('register'))
+    else: # GET
+        return render_template('register.html')
