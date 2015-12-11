@@ -49,7 +49,73 @@ class UserInfo(db.Model):
         return """
         <User id={id} name={name}
         mail={mail} score={score}
-        """.format(id=str(self.id), name=self.name, mail=self.mail, score=str(self.score))
+        """.format(id=str(self.id), name=self.name,
+                   mail=self.mail, score=str(self.score))
+
+
+class ProblemTable(db.Model):
+    """
+    CREATE TABLE problem (
+        problem_id integer primary_key,
+        point integer,
+        type text, # 問題カテゴリ
+        title text,
+        body text
+        hint text
+    )
+    """
+    __tablename__ = "problem"
+
+    problem_id = db.Column(db.Integer, primary_key=True)
+    point = db.Column(db.Integer, nullable=False)
+    type = db.Column(db.String(32), default='', nullable=False)
+    title = db.Column(db.String(100), default='', nullable=False)
+    body = db.Column(db.Text)
+    hint = db.Column(db.Text)
+
+    def __init__(self, point, type, title, body, hint):
+        self.point = point
+        self.type = type
+        self.title = title
+        self.body = body
+        self.hint = hint
+
+    def __repr__(self):
+        return """
+        Problem_ID: {id}, Point: {point}, type: {type},
+        TITLE:{title}
+        """.format(id=str(self.problem_id), point=str(self.point),
+                   type=self.type, title=self.title)
+
+
+class ScoreTable(db.Model):
+    """
+    CREATE TABLE score (
+        id integer primary_key,
+        problem_id integer
+        solved bool
+        solved_time text
+    )
+    """
+    __tablename__ = "score"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    problem_id = db.Column(db.Integer)
+    solved = db.Column(db.Boolean(False))
+    solved_time = db.Column(db.DateTime())
+
+    def __init__(self, problem_id, solved, solved_time):
+        self.problem_id = problem_id
+        self.solved = solved
+        self.solved_time = solved_time
+
+    def __repr__(self):
+        return """
+        user_id = {user_id} problem_id = {problem_id}
+        solved = {solved}
+        """.format(user_id=str(self.user_id), problem_id=str(self.problem_id),
+                   solved=self.solved)
 
 
 def init():
