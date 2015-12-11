@@ -8,18 +8,18 @@ from rabbit_server.forms import LoginForm
 
 def login_required(f):
     @wraps(f)
-    def decorated_view(*args, **kwargs):
+    def decorated_function(*args, **kwargs):
         if g.user is None:
-            return redirect(url_for('login', next=request.path))
+            return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
-    return decorated_view
+    return decorated_function
 
 
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get('admin', None) is None:
-            return redirect('/login')
+            return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -81,11 +81,23 @@ def top_problem():
     return render_template('problem_top.html', problems=problems)
 
 
-@app.route('/problem/<id>')
+@app.route('/problem/<id>', methods=["GET", "POST"])
 @login_required
 def view_problem(id):
     problem = db.session.query(ProblemTable).filter(
         ProblemTable.problem_id == id).all()
+    # FLAGの提出
+    if request.method == "POST":
+        flag = request.form["flag"]
+        q = db.session.query(ProblemTable).filter(ProblemTable.flag == flag).all()
+        print(q)
+        if q != []:
+            # TODO: INSERT DATABASE
+            flash("Congrats!", "success")
+        else:
+            flash("Invalid your answer", "danger")
+
+    # GET
     if problem:
         return render_template("problem/problem_view.html", problem=problem[0])
     return redirect(url_for('start_page'))
