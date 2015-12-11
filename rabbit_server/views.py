@@ -95,12 +95,14 @@ def add_admin():
 
 @app.route('/problem')
 def top_problem():
-    return render_template('problem_top.html')
+    problems = db.session.query(ProblemTable).all()
+    return render_template('problem_top.html', problems=problems)
 
 
 @app.route('/problem/<id>')
 def view_problem(id):
-    problem = db.session.query(ProblemTable).filter(ProblemTable.problem_id == id).all()
+    problem = db.session.query(ProblemTable).filter(
+        ProblemTable.problem_id == id).all()
     if problem:
         return render_template("problem/problem_view.html", problem=problem[0])
     return redirect(url_for('start_page'))
