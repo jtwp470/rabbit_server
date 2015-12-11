@@ -6,7 +6,7 @@
 <table class="table">
     <tr><th>#</th><th>Title</th><th>ジャンル</th><th>Point</th></tr>
     {% for problem in problems %}
-    <tr><td>{{ problem.problem_id }}</td><td><a href={{ url_for('view_problem', id=problem.id) }}>{{ problem.title }}</a></td>
+    <tr><td>{{ problem.problem_id }}</td><td><a href={{ url_for('view_problem', id=problem.problem_id) }}>{{ problem.title }}</a></td>
         <td>{{ problem.type }}</td><td>{{ problem.point }}</td>
     {% endfor %}
 </table>
