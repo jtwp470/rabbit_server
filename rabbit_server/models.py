@@ -60,8 +60,9 @@ class ProblemTable(db.Model):
         point integer,
         type text, # 問題カテゴリ
         title text,
-        body text
-        hint text
+        body text,
+        hint text,
+        flag text  # hashed
     )
     """
     __tablename__ = "problem"
@@ -72,20 +73,22 @@ class ProblemTable(db.Model):
     title = db.Column(db.String(100), default='', nullable=False)
     body = db.Column(db.Text)
     hint = db.Column(db.Text)
+    flag = db.Column(db.String(200), default='', nullable=False)
 
-    def __init__(self, point, type, title, body, hint):
+    def __init__(self, point, type, title, body, hint, flag):
         self.point = point
         self.type = type
         self.title = title
         self.body = body
         self.hint = hint
+        self.flag = flag
 
     def __repr__(self):
         return """
         Problem_ID: {id}, Point: {point}, type: {type},
-        TITLE:{title}
+        TITLE:{title} FLAG:{flag}
         """.format(id=str(self.problem_id), point=str(self.point),
-                   type=self.type, title=self.title)
+                   type=self.type, title=self.title, flag=self.flag)
 
 
 class ScoreTable(db.Model):

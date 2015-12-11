@@ -5,8 +5,6 @@ from rabbit_server import app, db
 from rabbit_server.models import UserInfo, ProblemTable
 from rabbit_server.forms import LoginForm
 
-is_admin = False
-
 
 def login_required(f):
     @wraps(f)
@@ -17,16 +15,22 @@ def login_required(f):
     return decorated_view
 
 
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get('admin', None) is None:
+            return redirect('/login')
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.before_request
 def load_user():
     user_id = session.get('id')
     if user_id is None:
         g.user = None
     else:
-        if user_id == 1:
-            is_admin = True
-            print("This is admin")
-            g.user = UserInfo.query.get(session['id'])
+        g.user = UserInfo.query.get(session['id'])
 
 
 @app.errorhandler(404)
@@ -49,6 +53,9 @@ def login():
         if authenticated:
             session['id'] = user.id
             session['name'] = user.name
+            if user.id == 1:
+                session['admin'] = "admin"
+                flash('You are admin!', 'info')
             flash('You were logged in', 'success')
             return redirect(url_for('start_page'))
         else:
@@ -57,6 +64,7 @@ def login():
 
 
 @app.route('/logout')
+@login_required
 def logout():
     if session:
         session.clear()
@@ -66,40 +74,15 @@ def logout():
     return redirect(url_for('start_page'))
 
 
-@app.route('/admin/add', methods=["GET", "POST"])
-def add_admin():
-    admin = db.session.query(UserInfo).filter(UserInfo.id == 1).all()
-    if admin == []:
-        if request.method == 'POST':
-            # Adminを作成する
-            if request.form['password'] == request.form['re_password']:
-
-                admin = UserInfo(name=request.form['name'],
-                                 mail=request.form['mail'],
-                                 password=request.form['password'],
-                                 score=0)
-                db.session.add(admin)
-                db.session.commit()
-                # ログインしたことにする
-                session['id'] = admin.id
-                session['name'] = admin.name
-                return redirect(url_for('start_page'))
-            else:
-                flash('Password is not match! Please retype password',
-                      'danger')
-                return redirect(url_for('add_admin'))
-        else:
-            return render_template('admin/add.html')
-    return redirect(url_for('start_page'))
-
-
 @app.route('/problem')
+@login_required
 def top_problem():
     problems = db.session.query(ProblemTable).all()
     return render_template('problem_top.html', problems=problems)
 
 
 @app.route('/problem/<id>')
+@login_required
 def view_problem(id):
     problem = db.session.query(ProblemTable).filter(
         ProblemTable.problem_id == id).all()
@@ -109,6 +92,8 @@ def view_problem(id):
 
 
 @app.route('/problem/new', methods=["GET", "POST"])
+@login_required
+@admin_only
 # TODO: Admin only
 def new_problem():
     """新しい問題を追加する"""
@@ -117,7 +102,8 @@ def new_problem():
                                    type=request.form["type"],
                                    title=request.form["title"],
                                    body=request.form["body"],
-                                   hint=request.form["hint"])
+                                   hint=request.form["hint"],
+                                   flag=request.form["flag"])
         db.session.add(new_problem)
         db.session.commit()
         return redirect(url_for('start_page'))
@@ -126,6 +112,8 @@ def new_problem():
 
 
 @app.route('/problem/<id>/edit', methods=["GET", "POST"])
+@login_required
+@admin_only
 # TODO: Admin only
 def edit_problem(id):
     """既存の問題を編集する"""
@@ -148,6 +136,7 @@ def view_notice():
 
 
 @app.route('/user/<id>')
+@login_required
 def view_user(id):
     user = db.session.query(UserInfo).filter(UserInfo.id == id).all()
     if user:
