@@ -61,6 +61,8 @@ def logout():
     if session:
         session.clear()
         flash('You were logged out', 'success')
+    else:
+        flash('Please login', 'warning')
     return redirect(url_for('start_page'))
 
 
