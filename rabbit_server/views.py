@@ -1,8 +1,9 @@
+from datetime import datetime
 from functools import wraps
 from flask import request, redirect, url_for, render_template, session, g, \
     flash, abort
 from rabbit_server import app, db
-from rabbit_server.models import UserInfo, ProblemTable
+from rabbit_server.models import UserInfo, ProblemTable, ScoreTable
 from rabbit_server.forms import LoginForm
 
 
@@ -85,21 +86,35 @@ def top_problem():
 @login_required
 def view_problem(id):
     problem = db.session.query(ProblemTable).filter(
-        ProblemTable.problem_id == id).all()
+        ProblemTable.problem_id == id).first()
     # FLAGの提出
     if request.method == "POST":
         flag = request.form["flag"]
-        q = db.session.query(ProblemTable).filter(ProblemTable.flag == flag).all()
-        print(q)
-        if q != []:
-            # TODO: INSERT DATABASE
-            flash("Congrats!", "success")
+        q = db.session.query(ProblemTable).filter(ProblemTable.flag == flag).first()
+        if q is not None:
+            q = db.session.query(ScoreTable).filter(ScoreTable.user_id == int(session['id'])).filter(ScoreTable.problem_id == int(id)).first()
+            if q is None:
+                flash("Congrats!", "success")
+                # INSERT DB
+                score = ScoreTable(user_id=int(session['id']),
+                                   problem_id=int(id),
+                                   solved=True,
+                                   solved_time=datetime.now())
+                db.session.add(score)
+                db.session.commit()
+                # 得点を更新
+                update_user = UserInfo.query.filter(UserInfo.id == int(session['id'])).first()
+                update_user.score += problem.point
+                db.session.add(update_user)
+                db.session.commit()
+            else:
+                flash("Error: CANNOT re-submit flag that solved", "danger")
         else:
             flash("Invalid your answer", "danger")
 
     # GET
     if problem:
-        return render_template("problem/problem_view.html", problem=problem[0])
+        return render_template("problem/problem_view.html", problem=problem)
     return redirect(url_for('start_page'))
 
 
@@ -118,7 +133,7 @@ def new_problem():
                                    flag=request.form["flag"])
         db.session.add(new_problem)
         db.session.commit()
-        return redirect(url_for('start_page'))
+        return redirect(url_for('view_problem', id=new_problem.id))
     else:
         return render_template("problem/new.html")
 

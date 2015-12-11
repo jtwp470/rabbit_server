@@ -95,8 +95,9 @@ class ScoreTable(db.Model):
     """
     CREATE TABLE score (
         id integer primary_key,
-        problem_id integer
-        solved bool
+        user_id integer,
+        problem_id integer,
+        solved bool,
         solved_time text
     )
     """
@@ -108,7 +109,8 @@ class ScoreTable(db.Model):
     solved = db.Column(db.Boolean(False))
     solved_time = db.Column(db.DateTime())
 
-    def __init__(self, problem_id, solved, solved_time):
+    def __init__(self, user_id, problem_id, solved, solved_time):
+        self.user_id = user_id
         self.problem_id = problem_id
         self.solved = solved
         self.solved_time = solved_time
