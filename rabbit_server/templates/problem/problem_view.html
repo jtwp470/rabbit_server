@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1>{{ problem.title }} <small><span class="label label-default">{{ problem.type }}</small></h1>
+    <p>{{ problem.point }} pts</p>
+
+    <h2>問題文</h2>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {{ problem.body | safe }}
+        </div>
+    </div>
+
+    <h2>Hint</h2>
+    {% if problem.hint != "" %}
+    <p>{{ problem.hint }}</p>
+    {% else %}
+    <p>Nothing</p>
+    {% endif %}
+
+    <form action="" method="post">
+        <div class="form-group">
+            <input type="hidden" name="xsrf_token"></input>
+            <label>Flag:</label>
+            <input type="text" class="form-control" name="flag" placeholder="USAGI{[0-9A-Za-z_]+}">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}

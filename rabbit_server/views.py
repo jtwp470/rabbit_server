@@ -2,7 +2,7 @@ from functools import wraps
 from flask import request, redirect, url_for, render_template, session, g, \
     flash, abort
 from rabbit_server import app, db
-from rabbit_server.models import UserInfo
+from rabbit_server.models import UserInfo, ProblemTable
 from rabbit_server.forms import LoginForm
 
 is_admin = False
@@ -94,8 +94,40 @@ def add_admin():
 
 
 @app.route('/problem')
-def view_problem():
-    return render_template('problem_view.html')
+def top_problem():
+    return render_template('problem_top.html')
+
+
+@app.route('/problem/<id>')
+def view_problem(id):
+    problem = db.session.query(ProblemTable).filter(ProblemTable.problem_id == id).all()
+    if problem:
+        return render_template("problem/problem_view.html", problem=problem[0])
+    return redirect(url_for('start_page'))
+
+
+@app.route('/problem/new', methods=["GET", "POST"])
+# TODO: Admin only
+def new_problem():
+    """新しい問題を追加する"""
+    if request.method == "POST":
+        new_problem = ProblemTable(point=int(request.form["point"]),
+                                   type=request.form["type"],
+                                   title=request.form["title"],
+                                   body=request.form["body"],
+                                   hint=request.form["hint"])
+        db.session.add(new_problem)
+        db.session.commit()
+        return redirect(url_for('start_page'))
+    else:
+        return render_template("problem/new.html")
+
+
+@app.route('/problem/<id>/edit', methods=["GET", "POST"])
+# TODO: Admin only
+def edit_problem(id):
+    """既存の問題を編集する"""
+    pass
 
 
 @app.route('/ranking')
