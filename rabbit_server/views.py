@@ -25,6 +25,10 @@ def admin_only(f):
     return decorated_function
 
 
+def is_admin():
+    return "admin" in session
+
+
 @app.before_request
 def load_user():
     user_id = session.get('id')
@@ -41,7 +45,7 @@ def page_not_found(e):
 
 @app.route('/')
 def start_page():
-    return render_template('index.html')
+    return render_template('index.html', is_admin=is_admin())
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -90,9 +94,12 @@ def view_problem(id):
     # FLAGの提出
     if request.method == "POST":
         flag = request.form["flag"]
-        q = db.session.query(ProblemTable).filter(ProblemTable.flag == flag).first()
+        q = db.session.query(ProblemTable).filter(
+            ProblemTable.flag == flag).first()
         if q is not None:
-            q = db.session.query(ScoreTable).filter(ScoreTable.user_id == int(session['id'])).filter(ScoreTable.problem_id == int(id)).first()
+            q = db.session.query(ScoreTable).filter(
+                ScoreTable.user_id == int(session['id'])).filter(
+                    ScoreTable.problem_id == int(id)).first()
             if q is None:
                 flash("Congrats!", "success")
                 # INSERT DB
@@ -110,9 +117,10 @@ def view_problem(id):
             else:
                 flash("Error: CANNOT re-submit flag that solved", "danger")
         else:
+            # TODO: Record invalid answer to db & views admin only.
             flash("Invalid your answer", "danger")
 
-    # GET
+    # For GET request
     if problem:
         return render_template("problem/problem_view.html", problem=problem)
     return redirect(url_for('start_page'))
@@ -121,7 +129,6 @@ def view_problem(id):
 @app.route('/problem/new', methods=["GET", "POST"])
 @login_required
 @admin_only
-# TODO: Admin only
 def new_problem():
     """新しい問題を追加する"""
     if request.method == "POST":
@@ -141,10 +148,11 @@ def new_problem():
 @app.route('/problem/<id>/edit', methods=["GET", "POST"])
 @login_required
 @admin_only
-# TODO: Admin only
 def edit_problem(id):
     """既存の問題を編集する"""
-    pass
+    problem = db.session.query(ProblemTable).filter(
+        ProblemTable.problem_id == id).all()
+    return render_template("problem/edit.html", problem=problem)
 
 
 @app.route('/ranking')
