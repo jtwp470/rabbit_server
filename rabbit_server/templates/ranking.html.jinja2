@@ -1,0 +1,12 @@
+{% extends "layout.html.jinja2" %}
+{% block body %}
+
+<h1>Ranking</h1>
+
+<table class="table table-condensed">
+  <tr><th>#</th><th>User name</th><th>Point</th></tr>
+  {{% for rank, user in enumurate(users) %}}
+  <tr><th>{{ rank }}</th><th><a href="{{ url_for('view_user', id=user.id) }}">{{ user.name }}</a></th><th>{{ user.score }}</th>
+  {{% endfor %}}
+</table>
+{% endblock %}

@@ -40,12 +40,12 @@ def load_user():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('404.html.jinja2'), 404
 
 
 @app.route('/')
 def start_page():
-    return render_template('index.html', is_admin=is_admin())
+    return render_template('index.html.jinja2', is_admin=is_admin())
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -65,7 +65,7 @@ def login():
             return redirect(url_for('start_page'))
         else:
             flash('Invalid user or password', 'danger')
-    return render_template('login.html', form=form)
+    return render_template('login.html.jinja2', form=form)
 
 
 @app.route('/logout')
@@ -83,7 +83,7 @@ def logout():
 @login_required
 def top_problem():
     problems = db.session.query(ProblemTable).all()
-    return render_template('problem_top.html', problems=problems)
+    return render_template('problem_top.html.jinja2', problems=problems)
 
 
 @app.route('/problem/<id>', methods=["GET", "POST"])
@@ -122,7 +122,7 @@ def view_problem(id):
 
     # For GET request
     if problem:
-        return render_template("problem/problem_view.html", problem=problem)
+        return render_template("problem/problem_view.html.jinja2", problem=problem)
     return redirect(url_for('start_page'))
 
 
@@ -142,7 +142,7 @@ def new_problem():
         db.session.commit()
         return redirect(url_for('view_problem', id=new_problem.id))
     else:
-        return render_template("problem/new.html")
+        return render_template("problem/new.html.jinja2")
 
 
 @app.route('/problem/<id>/edit', methods=["GET", "POST"])
@@ -152,30 +152,30 @@ def edit_problem(id):
     """既存の問題を編集する"""
     problem = db.session.query(ProblemTable).filter(
         ProblemTable.problem_id == id).all()
-    return render_template("problem/edit.html", problem=problem)
+    return render_template("problem/edit.html.jinja2", problem=problem)
 
 
 @app.route('/ranking')
 def view_ranking():
-    return render_template('ranking.html')
+    return render_template('ranking.html.jinja2')
 
 
 @app.route('/rule')
 def view_rule():
-    return render_template('rule.html')
+    return render_template('rule.html.jinja2')
 
 
 @app.route('/notice')
 def view_notice():
-    return render_template('notice.html')
+    return render_template('notice.html.jinja2')
 
 
 @app.route('/user/<id>')
 @login_required
 def view_user(id):
-    user = db.session.query(UserInfo).filter(UserInfo.id == id).all()
+    user = db.session.query(UserInfo).filter(UserInfo.id == id).first()
     if user:
-        return render_template('user_info.html', user=user[0])
+        return render_template('user_info.html.jinja2', user=user)
     else:
         abort(404)
 
@@ -199,4 +199,4 @@ def register():
                   'danger')
             return redirect(url_for('register'))
     else: # GET
-        return render_template('register.html')
+        return render_template('register.html.jinja2')
