@@ -157,7 +157,8 @@ def edit_problem(id):
 
 @app.route('/ranking')
 def view_ranking():
-    return render_template('ranking.html.jinja2')
+    users = db.session.query(UserInfo).order_by(UserInfo.score.desc()).all()
+    return render_template('ranking.html.jinja2', users=users)
 
 
 @app.route('/rule')
