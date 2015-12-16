@@ -2,7 +2,12 @@
 {% block body %}
 
 {% if user %}
-<h1>{{ user.name }}</h1>
+  <h1>
+    {{ user.name }}
+    {% if your_id == user.id %}
+      <small><span class="label label-info">You</span></small>
+    {% endif %}
+  </h1>
 
 <table class="table table-bordered">
     <tr><th>title</th><th>information</th></tr>

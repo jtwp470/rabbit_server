@@ -176,7 +176,8 @@ def view_notice():
 def view_user(id):
     user = db.session.query(UserInfo).filter(UserInfo.id == id).first()
     if user:
-        return render_template('user_info.html.jinja2', user=user)
+        return render_template('user_info.html.jinja2',
+                               user=user, your_id=session['id'])
     else:
         abort(404)
 
