@@ -175,9 +175,12 @@ def view_notice():
 @login_required
 def view_user(id):
     user = db.session.query(UserInfo).filter(UserInfo.id == id).first()
+    # SELECT * FROM score JOIN problem WHERE user_id = id
+    solved = db.session.query(ScoreTable, ProblemTable).join(ProblemTable).filter(
+        ScoreTable.user_id == id).group_by(ProblemTable.problem_id).all()
     if user:
         return render_template('user_info.html.jinja2',
-                               user=user, your_id=session['id'])
+                               user=user, solved=solved, your_id=session['id'])
     else:
         abort(404)
 

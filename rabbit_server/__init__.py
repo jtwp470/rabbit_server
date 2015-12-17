@@ -16,6 +16,12 @@ toolbar = DebugToolbarExtension(app)
 app.config.from_object('rabbit_server.config')
 app.jinja_env.globals['apptitle'] = "Rabbit CTF Score Server"
 
+
+def datetimeformat(value, format='%Y/%m/%d %H:%M'):
+    return value.strftime(format)
+
+app.jinja_env.filters['datetimeformat'] = datetimeformat
+
 # DB
 db = SQLAlchemy(app)
 
