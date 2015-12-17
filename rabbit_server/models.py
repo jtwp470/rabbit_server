@@ -1,4 +1,4 @@
-from sqlalchemy.orm import synonym
+from sqlalchemy.orm import synonym, relationship
 from werkzeug import check_password_hash, generate_password_hash
 
 from rabbit_server import db
@@ -104,10 +104,13 @@ class ScoreTable(db.Model):
     __tablename__ = "score"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    problem_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_info.id'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.problem_id'))
     solved = db.Column(db.Boolean(False))
     solved_time = db.Column(db.DateTime())
+
+    user = relationship("UserInfo")
+    problem = relationship("ProblemTable")
 
     def __init__(self, user_id, problem_id, solved, solved_time):
         self.user_id = user_id
@@ -121,6 +124,41 @@ class ScoreTable(db.Model):
         solved = {solved}
         """.format(user_id=str(self.user_id), problem_id=str(self.problem_id),
                    solved=self.solved)
+
+
+class WrongAnswerTable(db.Model):
+    """
+    CREATE TABLE wa_table (
+        id integer primary_key,
+        user_id integer,
+        problem_id integer,
+        wa string
+        date
+    )
+    """
+    __tablename__ = "wa_table"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_info.id'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.problem_id'))
+    wa = db.Column(db.String(100))
+    date = db.Column(db.DateTime())
+
+    user = relationship("UserInfo")
+    problem = relationship("ProblemTable")
+
+    def __init__(self, user_id, problem_id, wa, date):
+        self.user_id = user_id
+        self.problem_id = problem_id
+        self.wa = wa
+        self.date = date
+
+    def __repr__(self):
+        return """
+        user_id = {user_id} problem_id = {problem_id}
+        wrong_answer = {wa}
+        """.format(user_id=str(self.user_id), problem_id=str(self.problem_id),
+                   wa=self.wa)
 
 
 def init():
