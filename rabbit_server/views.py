@@ -50,6 +50,10 @@ def start_page():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if session.get('id'):
+        # return redirect(url_for('logout'))
+        session.clear()
+
     form = LoginForm(request.form)
     if form.validate_on_submit():
         user, authenticated = UserInfo.authenticate(db.session.query,
@@ -140,7 +144,7 @@ def new_problem():
                                    flag=request.form["flag"])
         db.session.add(new_problem)
         db.session.commit()
-        return redirect(url_for('view_problem', id=new_problem.id))
+        return redirect(url_for('view_problem', id=new_problem.problem_id))
     else:
         return render_template("problem/new.html.jinja2")
 
@@ -187,7 +191,7 @@ def view_user(id):
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
-    if request.method == 'POST':
+    if request.method == 'POST' and session.get('id') is None:
         if request.form['password'] == request.form['re_password']:
             user = UserInfo(name=request.form['name'],
                             mail=request.form['mail'],
