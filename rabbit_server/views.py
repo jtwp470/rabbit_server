@@ -87,7 +87,12 @@ def logout():
 @login_required
 def top_problem():
     problems = db.session.query(ProblemTable).all()
-    return render_template('problem_top.html.jinja2', problems=problems)
+    scores = db.session.query(ScoreTable.problem_id).filter(
+        ScoreTable.solved == True).filter(
+            ScoreTable.user_id == session.get('id')).all()
+    scores = [x[0] for x in scores]
+    return render_template('problem_top.html.jinja2',
+                           problems=problems, scores=scores)
 
 
 @app.route('/problem/<id>', methods=["GET", "POST"])
@@ -95,6 +100,10 @@ def top_problem():
 def view_problem(id):
     problem = db.session.query(ProblemTable).filter(
         ProblemTable.problem_id == id).first()
+    score = db.session.query(ScoreTable).filter(
+        ScoreTable.problem_id == id).filter(
+            ScoreTable.user_id == session.get('id')).filter(
+                ScoreTable.solved == True).first()
     # FLAGの提出
     if request.method == "POST":
         flag = request.form["flag"]
@@ -126,7 +135,8 @@ def view_problem(id):
 
     # For GET request
     if problem:
-        return render_template("problem/problem_view.html.jinja2", problem=problem)
+        return render_template("problem/problem_view.html.jinja2",
+                               problem=problem, score=score)
     return redirect(url_for('start_page'))
 
 

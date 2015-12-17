@@ -17,13 +17,16 @@
     {% else %}
     <p>Nothing</p>
     {% endif %}
-
-    <form action="{{ url_for('view_problem', id=problem.problem_id) }}" method="post">
+    {% if score %}
+      <div class="alert alert-info">You were solved this problem</div>
+    {% else %}
+      <form action="{{ url_for('view_problem', id=problem.problem_id) }}" method="post">
         <div class="form-group">
-            <input type="hidden" name="xsrf_token"></input>
-            <label>Flag:</label>
-            <input type="text" class="form-control" name="flag" placeholder="USAGI{[0-9A-Za-z_]+}">
+          <input type="hidden" name="xsrf_token"></input>
+          <label>Flag:</label>
+          <input type="text" class="form-control" name="flag" placeholder="USAGI{[0-9A-Za-z_]+}">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+      </form>
+    {% endif %}
 {% endblock %}
