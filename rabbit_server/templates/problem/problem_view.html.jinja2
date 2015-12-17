@@ -4,6 +4,9 @@
 <h1>{{ problem.title }} <small><span class="label label-default">{{ problem.type }}</small></h1>
     <p>{{ problem.point }} pts</p>
 
+    {% if is_admin %}
+      <button type="submit" class="btn btn-success" onclick="location.href='{{ url_for('edit_problem', id=problem.problem_id) }}'">Edit</button>
+    {% endif %}
     <h2>問題文</h2>
     <div class="panel panel-default">
         <div class="panel-body">

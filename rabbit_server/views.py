@@ -136,7 +136,7 @@ def view_problem(id):
     # For GET request
     if problem:
         return render_template("problem/problem_view.html.jinja2",
-                               problem=problem, score=score)
+                               problem=problem, score=score, is_admin=is_admin())
     return redirect(url_for('start_page'))
 
 
@@ -165,8 +165,22 @@ def new_problem():
 def edit_problem(id):
     """既存の問題を編集する"""
     problem = db.session.query(ProblemTable).filter(
-        ProblemTable.problem_id == id).all()
-    return render_template("problem/edit.html.jinja2", problem=problem)
+        ProblemTable.problem_id == id).first()
+    if request.method == "POST":
+        problem.point = int(request.form["point"])
+        problem.type = request.form["type"]
+        problem.body = request.form["body"]
+        problem.hint = request.form["hint"]
+        problem.flag = request.form["flag"]
+
+        # db.session.update(problem, synchronize_session=False)
+        db.session.commit()
+        flash('Success update problem', 'success')
+        return redirect(url_for('view_problem', id=problem.problem_id))
+    elif problem:
+        return render_template("problem/edit.html.jinja2", problem=problem)
+    else:
+        return abort(404)
 
 
 @app.route('/ranking')
