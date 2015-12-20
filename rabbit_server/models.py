@@ -161,5 +161,45 @@ class WrongAnswerTable(db.Model):
                    wa=self.wa)
 
 
+class NoticeTable(db.Model):
+    """
+    Adminから競技者へお知らせ
+
+    CREATE TABLE notice (
+        id integer primary_key,
+        title string
+        body string
+        date
+    )
+    """
+    __tablename__ = "notice"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text)
+    body = db.Column(db.Text)
+    date = db.Column(db.DateTime)
+
+    def __init__(self, title, body, date):
+        self.title = title
+        self.body = body
+        self.date = date
+
+    def __repr__(self):
+        return """
+        TITLE:{title}
+        {body}
+        Updated:{date}""".format(
+            title=self.title, body=self.body, date=self.date)
+
+    # TO DICT
+    def serialize(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'body': self.body,
+            'date': self.date
+        }
+
+
 def init():
     db.create_all()

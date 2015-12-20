@@ -1,10 +1,10 @@
 from datetime import datetime
 from functools import wraps
 from flask import request, redirect, url_for, render_template, session, g, \
-    flash, abort
+    flash, abort, jsonify
 from rabbit_server import app, db
 from rabbit_server.models import UserInfo, ProblemTable, ScoreTable, \
-    WrongAnswerTable
+    WrongAnswerTable, NoticeTable
 from rabbit_server.forms import LoginForm
 
 
@@ -211,7 +211,47 @@ def view_rule():
 
 @app.route('/notice')
 def view_notice():
-    return render_template('notice.html.jinja2', is_admin=is_admin())
+    notices = db.session.query(NoticeTable).order_by(
+        NoticeTable.date.desc()).all()
+    last_id = 1
+    if len(notices) >= 1:
+        last_id = notices[-1].id + 1
+
+    return render_template('notice.html.jinja2',
+                           notices=notices,
+                           last_id=last_id,
+                           is_admin=is_admin())
+
+
+@app.route('/notice/<id>')
+def view_notice_id(id):
+    notice = db.session.query(NoticeTable).get(id)
+    if notice is None:
+        notice = {}
+    else:
+        notice = notice.serialize()
+    return jsonify(notice)
+
+
+@app.route('/notice/<id>/edit', methods=["GET", "POST"])
+@admin_only
+def edit_notice(id):
+    notice = db.session.query(NoticeTable).filter(NoticeTable.id == id).first()
+    if request.method == 'POST':
+        if notice:  # UPDATE notice
+            notice.title = request.form["title"]
+            notice.body = request.form["body"]
+            notice.date = datetime.now()
+        else:
+            notice = NoticeTable(
+                title=request.form["title"],
+                body=request.form["body"],
+                date=datetime.now())
+            db.session.add(notice)
+        db.session.commit()
+        return redirect(url_for('view_notice'))
+    else:
+        return render_template('new_notice.html.jinja2', id=id)
 
 
 @app.route('/log')

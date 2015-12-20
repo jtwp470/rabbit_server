@@ -1,5 +1,27 @@
 {% extends "layout.html.jinja2" %}
 {% block body %}
 
-<h1>Notice</h1>
+  <h1>Notice</h1>
+  {% if notices %}
+    {% for notice in notices %}
+      <div class="panel panel-success">
+        <div class="panel-heading">{{ notice.title }}</div>
+        <div class="panel-body">
+          {{ notice.body }}
+        </div>
+        <div class="panel-footer">
+          Updated: {{ notice.date|datetimeformat }}
+          {% if is_admin %}
+            <a href="{{ url_for('edit_notice', id=notice.id) }}" class="btn btn-primary btn-sm pull-right">Edit</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>お知らせはありません</p>
+  {% endif %}
+
+  {% if is_admin %}
+    <a href="{{ url_for('edit_notice', id=last_id) }}" class="btn btn-primary btn-sm pull-right">Add new notice</a>
+  {% endif %}
 {% endblock %}
