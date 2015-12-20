@@ -20,8 +20,12 @@
     <table class="table table-striped">
       <tr><th>#</th><th>title</th><th>score</th><th>solved time</th></tr>
       {% for solve in solved %}
-        <tr><th>{{ loop.index }}</th><th><a href="{{ url_for('view_problem', id=solve[1].problem_id) }}">{{ solve[1].title }}</a></th><th>{{ solve[1].point }}</th><th>{{ solve[0].solved_time|datetimeformat }}</th></tr>
-    {% endfor %}
+        <tr>
+          <th>{{ loop.index }}</th>
+          <th><a href="{{ url_for('view_problem', id=solve[1].problem_id) }}">{{ solve[1].title }}</a></th>
+          <th>{{ solve[1].point }}</th><th>{{ solve[0].solved_time|datetimeformat }}</th>
+        </tr>
+      {% endfor %}
     </table>
   {% endif %}
 {% endblock %}

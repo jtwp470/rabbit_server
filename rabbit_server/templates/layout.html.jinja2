@@ -41,6 +41,9 @@
             <li><a href="{{ url_for('view_ranking') }}">Ranking</a></li>
             <li><a href="{{ url_for('view_rule') }}">Rule</a></li>
             <li><a href="{{ url_for('view_notice') }}">Notice</a></li>
+            {% if is_admin %}
+              <li><a href="{{ url_for('view_log') }}">Log</a></li>
+            {% endif %}
           </ul>
           <!-- navber-right -->
           <ul class="nav navbar-nav navbar-right">

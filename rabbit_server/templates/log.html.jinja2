@@ -1,0 +1,18 @@
+{% extends "layout.html.jinja2" %}
+{% block body %}
+
+<h1>Log</h1>
+
+<table class="table table-condensed">
+  <tr><th>#</th><th>Problem</th><th>User</th><th>Input wrong flag</th><th>Date</th></tr>
+  {% for wa in wrong_answers %}
+    <tr>
+      <th>{{ loop.index }}</th>
+      <th><a href="{{ url_for('view_problem', id=wa[2].problem_id) }}">{{ wa[2].title }}</a></th>
+      <th><a href="{{ url_for('view_user', id=wa[1].id )}}">{{ wa[1].name }}<a></th>
+      <th><code>{{ wa[0].wa }}</code></th>
+      <th>{{ wa[0].date|datetimeformat }}<th>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

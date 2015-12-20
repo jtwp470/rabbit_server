@@ -3,7 +3,8 @@ from functools import wraps
 from flask import request, redirect, url_for, render_template, session, g, \
     flash, abort
 from rabbit_server import app, db
-from rabbit_server.models import UserInfo, ProblemTable, ScoreTable
+from rabbit_server.models import UserInfo, ProblemTable, ScoreTable, \
+    WrongAnswerTable
 from rabbit_server.forms import LoginForm
 
 
@@ -92,17 +93,19 @@ def top_problem():
             ScoreTable.user_id == session.get('id')).all()
     scores = [x[0] for x in scores]
     return render_template('problem_top.html.jinja2',
-                           problems=problems, scores=scores)
+                           problems=problems, scores=scores,
+                           is_admin=is_admin())
 
 
 @app.route('/problem/<id>', methods=["GET", "POST"])
 @login_required
 def view_problem(id):
+    session_id = session.get('id', -1)
     problem = db.session.query(ProblemTable).filter(
         ProblemTable.problem_id == id).first()
     score = db.session.query(ScoreTable).filter(
         ScoreTable.problem_id == id).filter(
-            ScoreTable.user_id == session.get('id')).filter(
+            ScoreTable.user_id == session_id).filter(
                 ScoreTable.solved == True).first()
     # FLAGの提出
     if request.method == "POST":
@@ -111,32 +114,41 @@ def view_problem(id):
             ProblemTable.flag == flag).first()
         if q is not None:
             q = db.session.query(ScoreTable).filter(
-                ScoreTable.user_id == int(session['id'])).filter(
-                    ScoreTable.problem_id == int(id)).first()
+                ScoreTable.user_id == session_id).filter(
+                    ScoreTable.problem_id == id).first()
             if q is None:
                 flash("Congrats!", "success")
                 # INSERT DB
-                score = ScoreTable(user_id=int(session['id']),
+                score = ScoreTable(user_id=session_id,
                                    problem_id=int(id),
                                    solved=True,
                                    solved_time=datetime.now())
                 db.session.add(score)
                 db.session.commit()
                 # 得点を更新
-                update_user = UserInfo.query.filter(UserInfo.id == int(session['id'])).first()
+                update_user = UserInfo.query.filter(
+                    UserInfo.id == session_id).first()
                 update_user.score += problem.point
                 db.session.add(update_user)
                 db.session.commit()
             else:
                 flash("Error: CANNOT re-submit flag that solved", "danger")
         else:
-            # TODO: Record invalid answer to db & views admin only.
+            # Record invalid answer
+            wrong_answer = WrongAnswerTable(
+                user_id=session_id,
+                problem_id=id,
+                wa=flag,
+                date=datetime.now())
+            db.session.add(wrong_answer)
+            db.session.commit()
             flash("Invalid your answer", "danger")
 
     # For GET request
     if problem:
         return render_template("problem/problem_view.html.jinja2",
-                               problem=problem, score=score, is_admin=is_admin())
+                               problem=problem, score=score,
+                               is_admin=is_admin())
     return redirect(url_for('start_page'))
 
 
@@ -178,7 +190,9 @@ def edit_problem(id):
         flash('Success update problem', 'success')
         return redirect(url_for('view_problem', id=problem.problem_id))
     elif problem:
-        return render_template("problem/edit.html.jinja2", problem=problem)
+        return render_template("problem/edit.html.jinja2",
+                               problem=problem,
+                               is_admin=is_admin())
     else:
         return abort(404)
 
@@ -186,17 +200,28 @@ def edit_problem(id):
 @app.route('/ranking')
 def view_ranking():
     users = db.session.query(UserInfo).order_by(UserInfo.score.desc()).all()
-    return render_template('ranking.html.jinja2', users=users)
+    return render_template('ranking.html.jinja2',
+                           users=users, is_admin=is_admin())
 
 
 @app.route('/rule')
 def view_rule():
-    return render_template('rule.html.jinja2')
+    return render_template('rule.html.jinja2', is_admin=is_admin())
 
 
 @app.route('/notice')
 def view_notice():
-    return render_template('notice.html.jinja2')
+    return render_template('notice.html.jinja2', is_admin=is_admin())
+
+
+@app.route('/log')
+@admin_only
+def view_log():
+    wrong_answers = db.session.query(
+        WrongAnswerTable, UserInfo, ProblemTable).join(UserInfo).join(
+            ProblemTable).all()
+    return render_template('log.html.jinja2',
+                           wrong_answers=wrong_answers, is_admin=is_admin())
 
 
 @app.route('/user/<id>')
@@ -204,11 +229,14 @@ def view_notice():
 def view_user(id):
     user = db.session.query(UserInfo).filter(UserInfo.id == id).first()
     # SELECT * FROM score JOIN problem WHERE user_id = id
-    solved = db.session.query(ScoreTable, ProblemTable).join(ProblemTable).filter(
-        ScoreTable.user_id == id).group_by(ProblemTable.problem_id).all()
+    solved = db.session.query(ScoreTable, ProblemTable).join(
+        ProblemTable).filter(ScoreTable.user_id == id).group_by(
+            ProblemTable.problem_id).all()
     if user:
         return render_template('user_info.html.jinja2',
-                               user=user, solved=solved, your_id=session['id'])
+                               user=user, solved=solved,
+                               your_id=session['id'],
+                               is_admin=is_admin())
     else:
         abort(404)
 
