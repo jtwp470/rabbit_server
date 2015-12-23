@@ -34,6 +34,10 @@
       <label>FLAG (answer)</label>
       <input type="text" class="form-control" name="flag" value="{{ problem.flag }}" placeholder="USAGI{[a-zA-Z0-9_]+}" required>
     </div>
+    <div class="form-group">
+      <label>Is publish?</label>
+      <input type="checkbox" class="form-control" name="is_public" value="is_public">
+    </div>
     <button type="submit" class="btn btn-primary">Renew this problem</button>
   </form>
 {% endblock %}

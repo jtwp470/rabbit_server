@@ -46,11 +46,9 @@ class UserInfo(db.Model):
         return user, user.check_password(password)
 
     def __repr__(self):
-        return """
-        <User id={id} name={name}
-        mail={mail} score={score}
-        """.format(id=str(self.id), name=self.name,
-                   mail=self.mail, score=str(self.score))
+        return "<User id={id} name={name} mail={mail} score={score} pts".format(
+            id=str(self.id), name=self.name, mail=self.mail,
+            score=str(self.score))
 
 
 class ProblemTable(db.Model):
@@ -63,6 +61,7 @@ class ProblemTable(db.Model):
         body text,
         hint text,
         flag text  # hashed
+        is_public boolean  # 公開フラグ
     )
     """
     __tablename__ = "problem"
@@ -74,21 +73,24 @@ class ProblemTable(db.Model):
     body = db.Column(db.Text)
     hint = db.Column(db.Text)
     flag = db.Column(db.String(200), default='', nullable=False)
+    is_public = db.Column(db.Boolean(False))
 
-    def __init__(self, point, type, title, body, hint, flag):
+    def __init__(self, point, type, title, body, hint, flag, is_public):
         self.point = point
         self.type = type
         self.title = title
         self.body = body
         self.hint = hint
         self.flag = flag
+        self.is_public = is_public
 
     def __repr__(self):
         return """
-        Problem_ID: {id}, Point: {point}, type: {type},
-        TITLE:{title} FLAG:{flag}
+        Problem_ID: {id}, Point: {point}, type: {type}, TITLE:{title}
+        FLAG:{flag} PUBLIC? {is_public}
         """.format(id=str(self.problem_id), point=str(self.point),
-                   type=self.type, title=self.title, flag=self.flag)
+                   type=self.type, title=self.title, flag=self.flag,
+                   is_public=self.is_public)
 
 
 class ScoreTable(db.Model):

@@ -87,7 +87,10 @@ def logout():
 @app.route('/problem')
 @login_required
 def top_problem():
-    problems = db.session.query(ProblemTable).all()
+    problems = db.session.query(ProblemTable)
+    if is_admin() is False:
+        problems = problems.filter(ProblemTable.is_public == True)
+    problems = problems.all()
     scores = db.session.query(ScoreTable.problem_id).filter(
         ScoreTable.solved == True).filter(
             ScoreTable.user_id == session.get('id')).all()
@@ -102,7 +105,10 @@ def top_problem():
 def view_problem(id):
     session_id = session.get('id', -1)
     problem = db.session.query(ProblemTable).filter(
-        ProblemTable.problem_id == id).first()
+        ProblemTable.problem_id == id)
+    if is_admin() is False:
+        problem = problem.filter(ProblemTable.is_public == True)
+    problem = problem.first()
     score = db.session.query(ScoreTable).filter(
         ScoreTable.problem_id == id).filter(
             ScoreTable.user_id == session_id).filter(
@@ -163,7 +169,9 @@ def new_problem():
                                    title=request.form["title"],
                                    body=request.form["body"],
                                    hint=request.form["hint"],
-                                   flag=request.form["flag"])
+                                   flag=request.form["flag"],
+                                   is_public=(request.form.get
+                                              ("is_public") is not None))
         db.session.add(new_problem)
         db.session.commit()
         return redirect(url_for('view_problem', id=new_problem.problem_id))
@@ -184,6 +192,7 @@ def edit_problem(id):
         problem.body = request.form["body"]
         problem.hint = request.form["hint"]
         problem.flag = request.form["flag"]
+        problem.is_public = (request.form.get("is_public") is not None)
 
         # db.session.update(problem, synchronize_session=False)
         db.session.commit()
