@@ -4,8 +4,9 @@ from flask import request, redirect, url_for, render_template, session, g, \
     flash, abort, jsonify
 from rabbit_server import app, db
 from rabbit_server.models import UserInfo, ProblemTable, ScoreTable, \
-    WrongAnswerTable, NoticeTable
+    WrongAnswerTable, NoticeTable, Config
 from rabbit_server.forms import LoginForm
+from rabbit_server.util import get_config
 
 
 def login_required(f):
@@ -46,7 +47,29 @@ def page_not_found(e):
 
 @app.route('/')
 def start_page():
-    return render_template('index.html.jinja2', is_admin=is_admin())
+    text = get_config('root_text')
+    if text is None:
+        text = ""
+    return render_template('index.html.jinja2', text=text, is_admin=is_admin())
+
+
+@app.route('/edit', methods=['GET', 'POST'])
+@admin_only
+def edit_start_page():
+    config = db.session.query(Config).filter(
+        Config.key == "root_text").first()
+    if request.method == "POST":
+        if config is None:
+            config = Config(key="root_text",
+                            value=request.form['text'])
+            db.session.add(config)
+        else:
+            config.value = request.form['text']
+        db.session.commit()
+        return redirect(url_for('start_page'))
+    else:
+        return render_template('index.html.jinja2',
+                               edit=True, is_admin=is_admin())
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -215,7 +238,29 @@ def view_ranking():
 
 @app.route('/rule')
 def view_rule():
-    return render_template('rule.html.jinja2', is_admin=is_admin())
+    text = get_config('rule_text')
+    if text is None:
+        text = ""
+    return render_template('rule.html.jinja2',
+                           text=text, is_admin=is_admin())
+
+
+@app.route('/role/edit', methods=["GET", "POST"])
+def edit_rule_page():
+    config = db.session.query(Config).filter(
+        Config.key == "rule_text").first()
+    if request.method == "POST":
+        if config is None:
+            config = Config(key="rule_text",
+                            value=request.form['text'])
+            db.session.add(config)
+        else:
+            config.value = request.form['text']
+        db.session.commit()
+        return redirect(url_for('view_rule'))
+    else:
+        return render_template('rule.html.jinja2',
+                               edit=True, is_admin=is_admin())
 
 
 @app.route('/notice')

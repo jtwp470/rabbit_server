@@ -4,4 +4,22 @@
 <div class="jumbotron">
     <h1>Welcome to g0tiu5a CTF!!</h1>
 </div>
+
+<div class="container">
+  {% if edit %}
+    <form action="{{ url_for('edit_start_page') }}" method="post">
+      <div class="form-group">
+        <label>Text</label>
+        <textarea class="form-control" name="text" rows="10"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+  {% else %}
+    {{ text | markdown }}
+  {% endif %}
+
+  {% if is_admin %}
+    <a href="{{ url_for('edit_start_page') }}" class="btn btn-primary btn-sm pull-right">Edit</a>
+  {% endif %}
+</div>
 {% endblock %}

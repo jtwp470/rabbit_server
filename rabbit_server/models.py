@@ -203,5 +203,20 @@ class NoticeTable(db.Model):
         }
 
 
+class Config(db.Model):
+    __tablename__ = "config"
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.Text)
+    value = db.Column(db.Text)
+
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+
+
+    def __repr__(self):
+        return "[ {key}:{value} ]".format(key=self.key, value=self.value)
+
+
 def init():
     db.create_all()
