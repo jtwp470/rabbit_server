@@ -1,10 +1,10 @@
 {% extends "layout.html.jinja2" %}
 {% block body %}
 
-<h1>Problem</h1>
+  <h1>Problem</h1>
 
-<table class="table">
-  <tr><th>#</th><th>Title</th><th>ジャンル</th><th>Point</th></tr>
+  <table class="table">
+    <tr><th>#</th><th>Title</th><th>ジャンル</th><th>Point</th></tr>
     {% for problem in problems %}
       {% if problem.problem_id in scores %}
         <tr class="success">
@@ -13,5 +13,8 @@
       {% endif %}
       <td>{{ problem.problem_id }}</td><td><a href={{ url_for('view_problem', id=problem.problem_id) }}>{{ problem.title }}</a></td><td>{{ problem.type }}</td><td>{{ problem.point }}</td></tr>
     {% endfor %}
-</table>
+  </table>
+  {% if is_admin %}
+    <a href="{{ url_for('new_problem') }}" class="btn btn-primary btn-sm pull-right">New problem</a>
+  {% endif %}
 {% endblock %}
