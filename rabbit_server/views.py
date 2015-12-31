@@ -1,3 +1,4 @@
+from urllib.parse import urlparse, urljoin
 from datetime import datetime
 from functools import wraps
 from flask import request, redirect, url_for, render_template, session, g, \
@@ -72,12 +73,34 @@ def edit_start_page():
                                edit=True, is_admin=is_admin())
 
 
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+        ref_url.netloc == test_url.netloc
+
+
+def get_redirect_target():
+    for target in request.values.get('next'), request.referrer:
+        if not target:
+            continue
+        if is_safe_url(target):
+            return target
+
+
+def redirect_back(endpoint, **values):
+    target = request.form['next']
+    if not target or not is_safe_url(target):
+        target = url_for(endpoint, **values)
+    return redirect(target)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get('id'):
         # return redirect(url_for('logout'))
         session.clear()
-
+    next = get_redirect_target()
     form = LoginForm(request.form)
     if form.validate_on_submit():
         user, authenticated = UserInfo.authenticate(db.session.query,
@@ -90,10 +113,10 @@ def login():
                 session['admin'] = "admin"
                 flash('You are admin!', 'info')
             flash('You were logged in', 'success')
-            return redirect(url_for('start_page'))
+            return redirect_back('start_page')
         else:
             flash('Invalid user or password', 'danger')
-    return render_template('login.html.jinja2', form=form)
+    return render_template('login.html.jinja2', form=form, next=next)
 
 
 @app.route('/logout')
