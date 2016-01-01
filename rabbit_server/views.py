@@ -6,7 +6,7 @@ from flask import request, redirect, url_for, render_template, session, g, \
 from rabbit_server import app, db
 from rabbit_server.models import UserInfo, ProblemTable, ScoreTable, \
     WrongAnswerTable, NoticeTable, Config
-from rabbit_server.forms import LoginForm
+from rabbit_server.forms import LoginForm, RegisterForm
 from rabbit_server.util import get_config
 
 
@@ -360,21 +360,24 @@ def view_user(id):
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
-    if request.method == 'POST' and session.get('id') is None:
-        if request.form['password'] == request.form['re_password']:
-            user = UserInfo(name=request.form['name'],
-                            mail=request.form['mail'],
-                            password=request.form['password'],
-                            score=0)
+    form = RegisterForm()
+    if form.validate_on_submit() and session.get('id') is None:
+        user = UserInfo()
+        user_exist = UserInfo.query.filter_by(name=form.username.data).first()
+        if user_exist:
+            form.username.errors.append(
+                'Username already taken. Please change')
+            return render_template('register.html', form=form)
+        else:
+            user.name = form.username.data
+            user.email = form.email.data
+            user.password = form.password.data
+            user.score = 0
             db.session.add(user)
             db.session.commit()
             # ログインしたことにする
             session['id'] = user.id
             session['name'] = user.name
             return redirect(url_for('start_page'))
-        else:
-            flash('Password is not match! Please retype password',
-                  'danger')
-            return redirect(url_for('register'))
     else: # GET
-        return render_template('register.html')
+        return render_template('register.html', form=form)

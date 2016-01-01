@@ -10,3 +10,5 @@ __pycache__/
 pip-selfcheck.json
 
 *.db
+
+localconfig.py

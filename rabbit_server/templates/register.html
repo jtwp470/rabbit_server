@@ -2,24 +2,36 @@
 {% block body %}
 
   <h1>Register</h1>
-  <p>Register user account</p>
-  <form action="{{ url_for('register') }}" method="post">
-    <div class="form-group">
-      <label>User name</label>
-      <input type="name" class="form-control" name="name" placeholder="[a-zA-Z0-9]+">
-    </div>
-    <div class="form-group">
-      <label>Mail address</label>
-      <input type="email" class="form-control" name="mail" placeholder="admin@example.com">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" class="form-control" name="password">
-    </div>
-    <div class="form-group">
-      <label>Repeat</label>
-      <input type="password" class="form-control" name="re_password">
-    </div>
-    <button type="submit" class="btn btn-primary">Add user</button>
-  </form>
+<p>Register user account</p>
+<form action="{{ url_for('register') }}" method="post">
+  {{ form.hidden_tag() }}
+  <div class="form-group {% if form.username.errors %} has-error {% endif %}">
+    <label>{{ form.username.label }}</label>
+    <input name="username" type="text" class="form-control" placeholder="[a-zA-Z0-9]+"/ required>
+    <p class="help-block">{{ form.username.errors[0] }}</p>
+  </div>
+
+  <div class="form-group {% if form.email.errors %} has-error {% endif %}">
+    <label>{{ form.email.label }}</label>
+    <input name="email" type="email" class="form-control" placeholder="example@example.com"/ required>
+    <p class="help-block">{{ form.email.errors[0] }}</p>
+  </div>
+
+  <div class="form-group {% if form.password.errors %} has-error {% endif %}">
+    <label>{{ form.password.label }}</label>
+    <input name="password" type="password" class="form-control" required>
+    <p class="help-block">{{ form.password.errors[0] }}</p>
+  </div>
+
+  <div class="form-group">
+    <label>{{ form.confirm.label }}</label>
+    <input name="confirm" type="password" class="form-control" required>
+  </div>
+
+  <div class="form-group {% if form.recaptcha.errors %} has-error {% endif %}">
+    {{ form.recaptcha }}
+    <p class="help-block">{{ form.recaptcha.errors[0] }}</p>
+  </div>
+  <button type="submit" class="btn btn-primary">Add user</button>
+</form>
 {% endblock %}

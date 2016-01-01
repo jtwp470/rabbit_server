@@ -1,13 +1,20 @@
+import sys
 from flask import Flask, Markup
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_debugtoolbar import DebugToolbarExtension
 from markdown import markdown
 
+sys.path.append("../")
+try:
+    import config.localconfig as localconfig
+except:
+    print("Error. config/localconfig.py does not exsit")
+
 
 app = Flask(__name__)
 
 # debug tool is deactive on production
-app.debug = True
+app.debug = localconfig.DEBUG
 app.config['SECRET_KEY'] = "SECRETSECRETSECRET"
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 toolbar = DebugToolbarExtension(app)
@@ -27,6 +34,9 @@ def datetimeformat(value, format='%Y/%m/%d %H:%M'):
 def markdown_filter(content):
     return Markup(markdown(content, extensions=['gfm']))
 
+
+app.config['RECAPTCHA_PUBLIC_KEY'] = localconfig.RECAPTCHA_PUBLIC_KEY
+app.config['RECAPTCHA_PRIVATE_KEY'] = localconfig.RECAPTCHA_PRIVATE_KEY
 
 # DB
 db = SQLAlchemy(app)

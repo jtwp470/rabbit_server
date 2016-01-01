@@ -1,4 +1,5 @@
 from rabbit_server.models import Config
+from flask import flash
 
 
 def get_config(key):

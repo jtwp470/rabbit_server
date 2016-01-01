@@ -19,3 +19,14 @@ g0tiu5a CTF Scoreboard server.
 5. Create admin account. `http://localhost:5000/register`
 6. Create new problem `http://localhost:5000/problem/new`
 7. Enjoy!
+
+
+## RECAPTCHA
+
+セキュリティ向上のためユーザー登録をする際にreCAPTCHAを必要とするようにしました.そのためには`Public Key`と`Secret Key`を取得する必要があります.これらは[Googleのページ](https://www.google.com/recaptcha/admin)で取得し,設定する必要があります.設定ファイルは`config/localconfig.py`に書く必要があります.体裁は以下のとおりです.
+
+```python
+RECAPTCHA_PUBLIC_KEY = 'YOUR PUBLIC KEY'
+RECAPTCHA_PRIVATE_KEY = 'YOUR SECRET KEY'
+DEBUG = False # これも必要
+```
