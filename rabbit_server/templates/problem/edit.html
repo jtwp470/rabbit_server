@@ -1,4 +1,4 @@
-{% extends "layout.html.jinja2" %}
+{% extends "layout.html" %}
 {% block body %}
   <h1>Edit Problem</h1>
   <form action="{{ url_for('edit_problem', id=problem.problem_id) }}" method="post">

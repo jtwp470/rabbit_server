@@ -43,7 +43,7 @@ def load_user():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html.jinja2'), 404
+    return render_template('404.html'), 404
 
 
 @app.route('/')
@@ -51,7 +51,7 @@ def start_page():
     text = get_config('root_text')
     if text is None:
         text = ""
-    return render_template('index.html.jinja2', text=text, is_admin=is_admin())
+    return render_template('index.html', text=text, is_admin=is_admin())
 
 
 @app.route('/edit', methods=['GET', 'POST'])
@@ -69,7 +69,7 @@ def edit_start_page():
         db.session.commit()
         return redirect(url_for('start_page'))
     else:
-        return render_template('index.html.jinja2',
+        return render_template('index.html',
                                edit=True, is_admin=is_admin())
 
 
@@ -116,7 +116,7 @@ def login():
             return redirect_back('start_page')
         else:
             flash('Invalid user or password', 'danger')
-    return render_template('login.html.jinja2', form=form, next=next)
+    return render_template('login.html', form=form, next=next)
 
 
 @app.route('/logout')
@@ -141,7 +141,7 @@ def top_problem():
         ScoreTable.solved == True).filter(
             ScoreTable.user_id == session.get('id')).all()
     scores = [x[0] for x in scores]
-    return render_template('problem_top.html.jinja2',
+    return render_template('problem_top.html',
                            problems=problems, scores=scores,
                            is_admin=is_admin())
 
@@ -198,7 +198,7 @@ def view_problem(id):
 
     # For GET request
     if problem:
-        return render_template("problem/problem_view.html.jinja2",
+        return render_template("problem/problem_view.html",
                                problem=problem, score=score,
                                is_admin=is_admin())
     return redirect(url_for('start_page'))
@@ -222,7 +222,7 @@ def new_problem():
         db.session.commit()
         return redirect(url_for('view_problem', id=new_problem.problem_id))
     else:
-        return render_template("problem/new.html.jinja2")
+        return render_template("problem/new.html")
 
 
 @app.route('/problem/<id>/edit', methods=["GET", "POST"])
@@ -245,7 +245,7 @@ def edit_problem(id):
         flash('Success update problem', 'success')
         return redirect(url_for('view_problem', id=problem.problem_id))
     elif problem:
-        return render_template("problem/edit.html.jinja2",
+        return render_template("problem/edit.html",
                                problem=problem,
                                is_admin=is_admin())
     else:
@@ -255,7 +255,7 @@ def edit_problem(id):
 @app.route('/ranking')
 def view_ranking():
     users = db.session.query(UserInfo).order_by(UserInfo.score.desc()).all()
-    return render_template('ranking.html.jinja2',
+    return render_template('ranking.html',
                            users=users, is_admin=is_admin())
 
 
@@ -264,7 +264,7 @@ def view_rule():
     text = get_config('rule_text')
     if text is None:
         text = ""
-    return render_template('rule.html.jinja2',
+    return render_template('rule.html',
                            text=text, is_admin=is_admin())
 
 
@@ -282,7 +282,7 @@ def edit_rule_page():
         db.session.commit()
         return redirect(url_for('view_rule'))
     else:
-        return render_template('rule.html.jinja2',
+        return render_template('rule.html',
                                edit=True, is_admin=is_admin())
 
 
@@ -294,7 +294,7 @@ def view_notice():
     if len(notices) >= 1:
         last_id = notices[-1].id + 1
 
-    return render_template('notice.html.jinja2',
+    return render_template('notice.html',
                            notices=notices,
                            last_id=last_id,
                            is_admin=is_admin())
@@ -328,7 +328,7 @@ def edit_notice(id):
         db.session.commit()
         return redirect(url_for('view_notice'))
     else:
-        return render_template('new_notice.html.jinja2', id=id)
+        return render_template('new_notice.html', id=id)
 
 
 @app.route('/log')
@@ -337,7 +337,7 @@ def view_log():
     wrong_answers = db.session.query(
         WrongAnswerTable, UserInfo, ProblemTable).join(UserInfo).join(
             ProblemTable).all()
-    return render_template('log.html.jinja2',
+    return render_template('log.html',
                            wrong_answers=wrong_answers, is_admin=is_admin())
 
 
@@ -350,7 +350,7 @@ def view_user(id):
         ProblemTable).filter(ScoreTable.user_id == id).group_by(
             ProblemTable.problem_id).all()
     if user:
-        return render_template('user_info.html.jinja2',
+        return render_template('user_info.html',
                                user=user, solved=solved,
                                your_id=session['id'],
                                is_admin=is_admin())
@@ -377,4 +377,4 @@ def register():
                   'danger')
             return redirect(url_for('register'))
     else: # GET
-        return render_template('register.html.jinja2')
+        return render_template('register.html')
