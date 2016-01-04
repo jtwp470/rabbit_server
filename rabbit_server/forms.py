@@ -37,3 +37,10 @@ class RegisterForm(Form):
     ])
     confirm = PasswordField('Repeat Password')
     recaptcha = RecaptchaField()
+
+
+class FlagForm(Form):
+    flag = TextField("Flag:", validators=[
+        Required(),
+        Regexp(r"USAGI{[a-zA-Z0-9!?_]+}")
+    ])

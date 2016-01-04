@@ -6,7 +6,7 @@ from flask import request, redirect, url_for, render_template, session, g, \
 from rabbit_server import app, db
 from rabbit_server.models import UserInfo, ProblemTable, ScoreTable, \
     WrongAnswerTable, NoticeTable, Config
-from rabbit_server.forms import LoginForm, RegisterForm
+from rabbit_server.forms import LoginForm, RegisterForm, FlagForm
 from rabbit_server.util import get_config
 
 
@@ -159,9 +159,10 @@ def view_problem(id):
         ScoreTable.problem_id == id).filter(
             ScoreTable.user_id == session_id).filter(
                 ScoreTable.solved == True).first()
+    form = FlagForm()
     # FLAGの提出
-    if request.method == "POST":
-        flag = request.form["flag"]
+    if form.validate_on_submit():
+        flag = form.flag.data
         q = db.session.query(ProblemTable).filter(
             ProblemTable.flag == flag).first()
         if q is not None:
@@ -200,7 +201,7 @@ def view_problem(id):
     if problem:
         return render_template("problem/problem_view.html",
                                problem=problem, score=score,
-                               is_admin=is_admin())
+                               is_admin=is_admin(), form=form)
     return redirect(url_for('start_page'))
 
 

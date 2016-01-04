@@ -7,7 +7,7 @@
     {% if is_admin %}
       <button type="submit" class="btn btn-success" onclick="location.href='{{ url_for('edit_problem', id=problem.problem_id) }}'">Edit</button>
     {% endif %}
-    <h2>問題文</h2>
+    <h2>Question</h2>
     <div class="panel panel-default">
         <div class="panel-body">
             {{ problem.body | markdown }}
@@ -16,7 +16,7 @@
 
     <h2>Hint</h2>
     {% if problem.hint != "" %}
-    <p>{{ problem.hint }}</p>
+    <p>{{ problem.hint | markdown }}</p>
     {% else %}
     <p>Nothing</p>
     {% endif %}
@@ -24,10 +24,11 @@
       <div class="alert alert-info">You were solved this problem</div>
     {% else %}
       <form action="{{ url_for('view_problem', id=problem.problem_id) }}" method="post">
-        <div class="form-group">
-          <input type="hidden" name="xsrf_token"></input>
+        <div class="form-group {% if form.flag.errors %} has-error {% endif %}">
+          {{ form.csrf_token }}
           <label>Flag:</label>
-          <input type="text" class="form-control" name="flag" placeholder="USAGI{[0-9A-Za-z_]+}">
+          <input type="text" class="form-control" name="flag" placeholder="USAGI{[0-9A-Za-z!?_]+}">
+          <p class="help-block">Invalid flag type. Recheck your input</p>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
